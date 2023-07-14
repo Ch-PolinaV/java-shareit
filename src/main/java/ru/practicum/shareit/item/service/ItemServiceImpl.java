@@ -3,7 +3,6 @@ package ru.practicum.shareit.item.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -30,12 +29,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         userStorage.getUserById(ownerId);
-
-        if (itemDto.getName() == null || itemDto.getName().isEmpty() ||
-                itemDto.getDescription() == null || itemDto.getDescription().isEmpty() ||
-                itemDto.getAvailable() == null) {
-            throw new ValidationException("Введены некорректные данные при создании новой вещи");
-        }
         return toItemDto(itemStorage.create(toItem(itemDto, userStorage.getUserById(ownerId))));
     }
 

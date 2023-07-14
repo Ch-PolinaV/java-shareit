@@ -2,11 +2,12 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.validation.CreateValidationGroup;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,7 +24,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto create(@RequestHeader(OWNER) Long ownerId,
-                          @Valid @RequestBody ItemDto itemDto) {
+                          @Validated(CreateValidationGroup.class) @RequestBody ItemDto itemDto) {
         log.debug("Получен POST-запрос к эндпоинту: /items на создание новой вещи");
         return itemService.create(itemDto, ownerId);
     }
