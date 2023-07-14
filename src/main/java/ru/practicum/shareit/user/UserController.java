@@ -34,15 +34,15 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto create(@Valid @RequestBody User user) {
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
         log.debug("Получен POST-запрос к эндпоинту: /users на создание нового пользователя");
-        return userService.create(user);
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{id}")
-    public UserDto update(@Valid @RequestBody User user, @PathVariable Long id) {
+    public UserDto update(@Valid @RequestBody UserDto userDto, @PathVariable Long id) {
         log.debug("Получен Patch-запрос к эндпоинту: /users на обновление или создание пользователя");
-        return userService.update(user, id);
+        return userService.update(userDto, id);
     }
 
     @DeleteMapping("/{id}")

@@ -4,45 +4,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.shareit.user.mapper.UserMapper.toUser;
+import static ru.practicum.shareit.user.mapper.UserMapper.toUserDto;
+
 @Service
 public class UserService {
     private final UserStorage userStorage;
-    private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UserStorage userStorage, UserMapper userMapper) {
+    public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.userMapper = userMapper;
     }
 
     public List<UserDto> findAll() {
         return userStorage.findAll().stream()
-                .map(userMapper::toUserDto)
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto getUserById(long id) {
-        return userMapper.toUserDto(userStorage.getUserById(id));
+        return toUserDto(userStorage.getUserById(id));
     }
 
-    public UserDto create(User user) {
-        return userMapper.toUserDto(userStorage.create(user));
+    public UserDto create(UserDto userDto) {
+        return toUserDto(userStorage.create(toUser(userDto)));
     }
 
-    public UserDto update(User user, Long id) {
-        if (user.getId() == null) {
-            user.setId(id);
+    public UserDto update(UserDto userDto, Long id) {
+        if (userDto.getId() == null) {
+            userDto.setId(id);
         }
-        return userMapper.toUserDto(userStorage.update(user));
+        return toUserDto(userStorage.update(toUser(userDto)));
     }
 
     public UserDto delete(Long id) {
-        return userMapper.toUserDto(userStorage.delete(id));
+        return toUserDto(userStorage.delete(id));
     }
 }

@@ -25,12 +25,12 @@ public class ItemController {
     public ItemDto create(@RequestHeader(OWNER) Long ownerId,
                           @Valid @RequestBody ItemDto itemDto) {
         log.debug("Получен POST-запрос к эндпоинту: /items на создание новой вещи");
-        return itemService.create(ownerId, itemDto);
+        return itemService.create(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestHeader(OWNER) Long ownerId,
-                          @Valid @RequestBody ItemDto itemDto, @PathVariable Long itemId) {
+                          @RequestBody ItemDto itemDto, @PathVariable Long itemId) {
         log.debug("Получен PATCH-запрос к эндпоинту: /items на обновление вещи с id: {}", itemId);
         return itemService.update(ownerId, itemDto, itemId);
     }

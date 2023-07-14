@@ -18,7 +18,6 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private long id = 1L;
 
-
     @Override
     public List<User> findAll() {
         log.debug("Текущее количество пользователей: {}", users.size());
@@ -27,7 +26,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Long id) {
-        if (!users.containsKey(id)) {
+        if (users.get(id) == null) {
             log.info("Пользователь не найден");
             throw new NotFoundException("Пользователь не найден");
         }
@@ -56,10 +55,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user) {
-        if (!users.containsKey(user.getId())) {
-            log.info("Пользователь не найден");
-            throw new NotFoundException("Пользователь не найден");
-        }
+        getUserById(user.getId());
+
         if (!users.values().stream()
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .allMatch(u -> u.getId().equals(user.getId()))) {
@@ -79,10 +76,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User delete(Long id) {
-        if (!users.containsKey(id)) {
-            log.info("Пользователь не найден");
-            throw new NotFoundException("Пользователь не найден");
-        }
+        getUserById(id);
         return users.remove(id);
     }
 
