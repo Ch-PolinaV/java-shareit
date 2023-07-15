@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemStorage;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.util.List;
@@ -28,8 +29,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
-        userStorage.getUserById(ownerId);
-        return toItemDto(itemStorage.create(toItem(itemDto, userStorage.getUserById(ownerId))));
+        User user = userStorage.getUserById(ownerId);
+        return toItemDto(itemStorage.create(toItem(itemDto, user)));
     }
 
     @Override

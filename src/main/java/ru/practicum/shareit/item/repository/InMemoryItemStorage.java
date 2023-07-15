@@ -1,12 +1,10 @@
 package ru.practicum.shareit.item.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exeption.AlreadyExistsException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,14 +15,8 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class InMemoryItemStorage implements ItemStorage {
-    private final UserStorage userStorage;
     private final Map<Long, Item> items = new HashMap<>();
     private long id = 1L;
-
-    @Autowired
-    public InMemoryItemStorage(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     @Override
     public Item create(Item item) {
@@ -50,6 +42,9 @@ public class InMemoryItemStorage implements ItemStorage {
         if (item.getAvailable() == null) {
             item.setAvailable(items.get(item.getId()).getAvailable());
         }
+        if (item.getRequest() == null) {
+            item.setRequest(items.get(item.getId()).getRequest());
+        }
         log.info("Вещь с id: {} обновлена", item.getId());
         items.put(item.getId(), item);
         return item;
@@ -67,7 +62,7 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public List<Item> getItemsByOwner(Long id) {
         return items.values().stream()
-                .filter(item -> item.getOwner().equals(userStorage.getUserById(id)))
+                .filter(item -> item.getOwner().getId().equals(id))
                 .collect(Collectors.toList());
     }
 

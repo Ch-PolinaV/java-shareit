@@ -39,10 +39,6 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Пользователь с id: {} уже существует", user.getId());
             throw new AlreadyExistsException("Пользователь с указанным id уже был добавлен ранее");
         }
-        if (user.getEmail() == null) {
-            log.info("Email не задан");
-            throw new ValidationException("Необходимо указать email");
-        }
         if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
             log.info("email: {} уже существует", user.getEmail());
             throw new AlreadyExistsException("Email: " + user.getEmail() + " уже используется другим пользователем");
