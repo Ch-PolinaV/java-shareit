@@ -18,8 +18,8 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
 import static ru.practicum.shareit.booking.BookingMapper.toBooking;
 import static ru.practicum.shareit.booking.BookingMapper.toBookingDto;
@@ -33,8 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-
-
+    
     @Transactional
     @Override
     public BookingDto create(Long bookerId, InputBookingDto inputBooking) {
@@ -120,7 +119,8 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case CURRENT:
-                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(), LocalDateTime.now());                break;
+                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(), LocalDateTime.now());
+                break;
             case PAST:
                 bookings = bookingRepository.findByBookerIdAndEndBefore(userId, LocalDateTime.now());
                 break;
