@@ -33,7 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-    
+
     @Transactional
     @Override
     public BookingDto create(Long bookerId, InputBookingDto inputBooking) {
