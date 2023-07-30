@@ -84,7 +84,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (item.getOwner().getId().equals(ownerId)) {
             Booking lastBooking = bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(itemId, LocalDateTime.now());
-            Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(itemId, LocalDateTime.now());
+            Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId, LocalDateTime.now(), BookingStatus.APPROVED);
 
             if (lastBooking != null) {
                 itemDto.setLastBooking(toBookingForItemDto(lastBooking));
@@ -108,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
             ItemDto itemDto = toItemDto(item, comments);
 
             Booking lastBooking = bookingRepository.findFirstByItem_IdAndEndBeforeOrderByEndDesc(item.getId(), LocalDateTime.now());
-            Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterOrderByStartAsc(item.getId(), LocalDateTime.now());
+            Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(item.getId(), LocalDateTime.now(), BookingStatus.APPROVED);
 
             if (lastBooking != null) {
                 itemDto.setLastBooking(toBookingForItemDto(lastBooking));

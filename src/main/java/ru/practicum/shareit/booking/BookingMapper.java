@@ -13,7 +13,6 @@ import java.util.List;
 import static ru.practicum.shareit.item.ItemMapper.toItemDto;
 import static ru.practicum.shareit.user.UserMapper.toUserDto;
 
-
 @Component
 public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking, List<Comment> comments) {
@@ -33,14 +32,6 @@ public class BookingMapper {
                 booking.getStart(),
                 booking.getEnd(),
                 booking.getBooker().getId()
-        );
-    }
-
-    public static InputBookingDto toInputBookingDto(Booking booking) {
-        return new InputBookingDto(
-                booking.getStart(),
-                booking.getEnd(),
-                booking.getItem().getId()
         );
     }
 
