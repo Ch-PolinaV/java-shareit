@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -14,8 +13,6 @@ public class CommentDto implements Serializable {
     private Long id;
     @NotEmpty
     private String text;
-    @JsonIgnore
-    private Item item;
     private LocalDateTime created;
     private String authorName;
 }
