@@ -1,12 +1,16 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class ItemMapper {
     public static ItemDto toItemDto(Item item, List<Comment> comments) {
         List<CommentDto> commentDtos = comments.stream()
@@ -21,6 +25,17 @@ public class ItemMapper {
                 null,
                 null,
                 commentDtos
+        );
+    }
+
+    public static ItemForBookingDto toItemForBookingDto(Item item) {
+        return new ItemForBookingDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                null,
+                null
         );
     }
 
@@ -41,6 +56,16 @@ public class ItemMapper {
                 comment.getText(),
                 comment.getCreated(),
                 comment.getAuthor().getName()
+        );
+    }
+
+    public static Comment toComment(CommentDto commentDto, Item item, User user) {
+        return new Comment(
+                commentDto.getId(),
+                commentDto.getText(),
+                item,
+                user,
+                LocalDateTime.now()
         );
     }
 }

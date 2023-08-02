@@ -7,11 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.InputBookingDto;
 import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.exeption.UnsupportedStatusException;
 import ru.practicum.shareit.exeption.ValidationException;
-import ru.practicum.shareit.item.Comment;
-import ru.practicum.shareit.item.CommentRepository;
-import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
@@ -23,6 +20,7 @@ import java.util.List;
 
 import static ru.practicum.shareit.booking.BookingMapper.toBooking;
 import static ru.practicum.shareit.booking.BookingMapper.toBookingDto;
+import static ru.practicum.shareit.booking.BookingState.toBookingState;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,7 +30,6 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-    private final CommentRepository commentRepository;
 
     @Transactional
     @Override
@@ -58,9 +55,8 @@ public class BookingServiceImpl implements BookingService {
 
         bookingRepository.save(booking);
         log.info("Добавлено новое бронирование: {}", booking);
-        List<Comment> comments = commentRepository.findByItemId(item.getId());
 
-        return toBookingDto(booking, comments);
+        return toBookingDto(booking);
     }
 
     @Transactional
@@ -89,9 +85,8 @@ public class BookingServiceImpl implements BookingService {
         }
 
         bookingRepository.save(booking);
-        List<Comment> comments = commentRepository.findByItemId(item.getId());
 
-        return toBookingDto(booking, comments);
+        return toBookingDto(booking);
     }
 
     @Override
@@ -102,10 +97,9 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Бронирование с ID=" + bookingId + " не найдено"));
         Item item = itemRepository.findById(booking.getItem().getId())
                 .orElseThrow(() -> new NotFoundException("Вещь с ID=" + booking.getItem().getId() + " не найдена!"));
-        List<Comment> comments = commentRepository.findByItemId(item.getId());
 
         if (item.getOwner().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
-            return toBookingDto(booking, comments);
+            return toBookingDto(booking);
         } else {
             throw new NotFoundException("Получение данных о бронировании может быть выполнено либо автором бронирования, либо владельцем вещи, к которой относится бронирование");
         }
@@ -144,8 +138,7 @@ public class BookingServiceImpl implements BookingService {
 
         List<BookingDto> bookingDtos = new ArrayList<>();
         for (Booking booking : bookings) {
-            List<Comment> comments = commentRepository.findByAuthor_Id(userId);
-            BookingDto bookingDto = toBookingDto(booking, comments);
+            BookingDto bookingDto = toBookingDto(booking);
             bookingDtos.add(bookingDto);
         }
 
@@ -185,21 +178,10 @@ public class BookingServiceImpl implements BookingService {
 
         List<BookingDto> bookingDtos = new ArrayList<>();
         for (Booking booking : bookings) {
-            List<Comment> comments = commentRepository.findByAuthor_Id(ownerId);
-            BookingDto bookingDto = toBookingDto(booking, comments);
+            BookingDto bookingDto = toBookingDto(booking);
             bookingDtos.add(bookingDto);
         }
 
         return bookingDtos;
-    }
-
-    private BookingState toBookingState(String state) {
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state);
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedStatusException(" state : " + state);
-        }
-        return bookingState;
     }
 }

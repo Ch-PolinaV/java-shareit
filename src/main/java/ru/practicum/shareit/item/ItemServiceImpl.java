@@ -9,6 +9,10 @@ import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -143,20 +147,17 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public CommentDto createComment(Long userId, CommentDto commentDto, Long itemId) {
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + userId + " не найден!"));
-        itemRepository.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с ID=" + itemId + " не найдена!"));
-        Comment comment = new Comment();
+        Comment comment;
 
         Booking booking = bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(itemId,
                 userId, LocalDateTime.now(), BookingStatus.APPROVED);
 
         if (booking != null) {
-            comment.setText(commentDto.getText());
-            comment.setItem(booking.getItem());
-            comment.setAuthor(booking.getBooker());
-            comment.setCreated(LocalDateTime.now());
+            comment = toComment(commentDto, item, user);
         } else {
             throw new ValidationException("Отзывы могут оставлять только пользователи, которые брали вещь в аренду");
         }
