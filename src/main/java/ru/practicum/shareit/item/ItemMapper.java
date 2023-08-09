@@ -1,0 +1,71 @@
+package ru.practicum.shareit.item;
+
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForBookingDto;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ItemMapper {
+    public static ItemDto toItemDto(Item item, List<Comment> comments) {
+        List<CommentDto> commentDtos = comments.stream()
+                .map(ItemMapper::toCommentDto)
+                .collect(Collectors.toList());
+
+        return new ItemDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                null,
+                null,
+                commentDtos
+        );
+    }
+
+    public static ItemForBookingDto toItemForBookingDto(Item item) {
+        return new ItemForBookingDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                null,
+                null
+        );
+    }
+
+    public static Item toItem(ItemDto itemDto, User user) {
+        return new Item(
+                itemDto.getId(),
+                itemDto.getName(),
+                itemDto.getDescription(),
+                itemDto.getAvailable(),
+                user,
+                null
+        );
+    }
+
+    public static CommentDto toCommentDto(Comment comment) {
+        return new CommentDto(
+                comment.getId(),
+                comment.getText(),
+                comment.getCreated(),
+                comment.getAuthor().getName()
+        );
+    }
+
+    public static Comment toComment(CommentDto commentDto, Item item, User user) {
+        return new Comment(
+                commentDto.getId(),
+                commentDto.getText(),
+                item,
+                user,
+                LocalDateTime.now()
+        );
+    }
+}

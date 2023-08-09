@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation.CreateValidationGroup;
 import ru.practicum.shareit.validation.UpdateValidationGroup;
 
@@ -47,8 +45,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public UserDto delete(@PathVariable long id) {
+    public void delete(@PathVariable long id) {
         log.debug("Получен DELETE-запрос к эндпоинту: /users/{} на удаление пользователя с id={}", id, id);
-        return userService.delete(id);
+        userService.delete(id);
     }
 }

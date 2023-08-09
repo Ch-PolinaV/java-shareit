@@ -1,31 +1,34 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.booking;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items")
+@Table(name = "bookings")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
-    private String description;
-    @Column(name = "is_available")
-    private Boolean available;
+    @Column(name = "start_date")
+    private LocalDateTime start;
+    @Column(name = "end_date")
+    private LocalDateTime end;
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    private User owner;
+    private Item item;
     @ManyToOne(fetch = FetchType.LAZY)
     @ToString.Exclude
-    private ItemRequest request;
+    private User booker;
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
 }
