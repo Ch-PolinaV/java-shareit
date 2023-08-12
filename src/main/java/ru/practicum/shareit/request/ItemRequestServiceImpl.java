@@ -44,18 +44,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         log.info("Получен список запросов пользователя с id: {}", requestorId);
 
-        return itemRequestRepository.findAllByRequestorOrderByCreatedDesc(requestorId).stream()
+        return itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(requestorId).stream()
                 .map(ItemRequestMapper::toItemRequestDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemRequestDto> getAllItemRequests(Long userId, Integer from, Integer size) {
-        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+        PageRequest page = PageRequest.of(from, size);
 
         log.info("Получен список запросов других пользователей");
 
-        return itemRequestRepository.findAllByRequestorNotOrderByCreatedDesc(userId, page)
+        return itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId, page)
                 .map(ItemRequestMapper::toItemRequestDto)
                 .getContent();
     }
