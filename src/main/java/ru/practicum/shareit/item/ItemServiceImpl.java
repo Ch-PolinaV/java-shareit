@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -34,16 +36,25 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Transactional
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + ownerId + " не найден!"));
+        Item item;
+
+        if (itemDto.getRequestId() != null) {
+            ItemRequest request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
+            item = itemRepository.save(toItem(itemDto, user, request));
+        } else {
+            item = itemRepository.save(toItem(itemDto, user, null));
+        }
 
         log.info("Добавлена новая вещь: {}", itemDto);
 
-        Item item = itemRepository.save(toItem(itemDto, user));
         List<Comment> comments = commentRepository.findByItemId(item.getId());
 
         return toItemDto(item, comments);
@@ -72,7 +83,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<Comment> comments = commentRepository.findByItemId(item.getId());
         ItemDto updateItemDto = toItemDto(item, comments);
-        itemRepository.save(toItem(updateItemDto, user));
+        itemRepository.save(toItem(updateItemDto, user, item.getRequest()));
 
         log.info("Вещь с id: {} обновлена", item.getId());
 
