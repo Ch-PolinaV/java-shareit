@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemForBookingDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
@@ -45,6 +46,24 @@ public class ItemMapper {
                 item.getAvailable(),
                 null,
                 null
+        );
+    }
+
+    public static ItemForItemRequestDto toItemForItemRequestDto(Item item) {
+        Long requestId;
+
+        if (item.getRequest() != null) {
+            requestId = item.getRequest().getId();
+        } else {
+            requestId = null;
+        }
+
+        return new ItemForItemRequestDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                requestId,
+                item.getAvailable()
         );
     }
 

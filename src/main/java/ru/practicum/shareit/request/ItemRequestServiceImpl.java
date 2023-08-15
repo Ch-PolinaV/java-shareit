@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -23,6 +24,7 @@ import static ru.practicum.shareit.request.ItemRequestMapper.toItemRequestDto;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
+    private final ItemService itemService;
 
     @Transactional
     @Override
@@ -34,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         itemRequestRepository.save(itemRequest);
 
         log.info("Добавлен новый запрос на вещь: {}", itemRequest);
-        return toItemRequestDto(itemRequest);
+        return toItemRequestDto(itemRequest, null);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Получен список запросов пользователя с id: {}", requestorId);
 
         return itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(requestorId).stream()
-                .map(ItemRequestMapper::toItemRequestDto)
+                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -56,7 +58,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Получен список запросов других пользователей");
 
         return itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId, page)
-                .map(ItemRequestMapper::toItemRequestDto)
+                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
                 .getContent();
     }
 
@@ -69,6 +71,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         log.info("Получен запрос с id: {}", requestId);
 
-        return toItemRequestDto(itemRequest);
+        return toItemRequestDto(itemRequest, itemService.getItemsByRequest(requestId));
     }
 }

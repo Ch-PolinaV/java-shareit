@@ -2,7 +2,7 @@ package ru.practicum.shareit.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
@@ -17,5 +17,5 @@ public class ItemRequestDto implements Serializable {
     private String description;
     private Long requestor;
     private LocalDateTime created;
-    //private List<ItemDto> items;
+    private List<ItemForItemRequestDto> items;
 }

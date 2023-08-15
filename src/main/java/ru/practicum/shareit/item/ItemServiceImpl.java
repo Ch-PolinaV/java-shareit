@@ -11,6 +11,7 @@ import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
@@ -173,5 +174,15 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Отзывы могут оставлять только пользователи, которые брали вещь в аренду");
         }
         return toCommentDto(commentRepository.save(comment));
+    }
+
+    @Override
+    public List<ItemForItemRequestDto> getItemsByRequest(Long requestId) {
+        itemRequestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
+
+        return itemRepository.findByRequest_IdOrderById(requestId).stream()
+                .map(ItemMapper::toItemForItemRequestDto)
+                .collect(Collectors.toList());
     }
 }
