@@ -53,7 +53,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public List<ItemRequestDto> getAllItemRequests(Long userId, Integer from, Integer size) {
-        PageRequest page = PageRequest.of(from, size);
+        PageRequest page = PageRequest.of(from > 0 ? from / size : from, size);
 
         log.info("Получен список запросов других пользователей");
 
