@@ -115,7 +115,8 @@ public class BookingServiceImpl implements BookingService {
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + userId + " не найден!"));
-        Page<Booking> bookings;
+        Page<Booking> bookings = null;
+
         switch (state) {
             case CURRENT:
                 bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId, LocalDateTime.now(), LocalDateTime.now(), page);
@@ -135,8 +136,6 @@ public class BookingServiceImpl implements BookingService {
             case ALL:
                 bookings = bookingRepository.findByBookerId(userId, page);
                 break;
-            default:
-                throw new IllegalArgumentException(" state: ");
         }
 
         return bookings.map(BookingMapper::toBookingDto).getContent();
@@ -151,7 +150,8 @@ public class BookingServiceImpl implements BookingService {
 
         userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + ownerId + " не найден!"));
-        Page<Booking> bookings;
+        Page<Booking> bookings = null;
+
         switch (state) {
             case CURRENT:
                 bookings = bookingRepository.findByItemOwnerIdAndStartIsBeforeAndEndAfter(ownerId, LocalDateTime.now(), LocalDateTime.now(), page);
@@ -171,8 +171,6 @@ public class BookingServiceImpl implements BookingService {
             case ALL:
                 bookings = bookingRepository.findByItemOwnerId(ownerId, page);
                 break;
-            default:
-                throw new IllegalArgumentException(" state: ");
         }
 
         return bookings.map(BookingMapper::toBookingDto).getContent();
