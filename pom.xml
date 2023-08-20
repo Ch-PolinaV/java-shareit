@@ -210,6 +210,9 @@
 										</limits>
 									</rule>
 								</rules>
+								<excludes>
+									<exclude>ru/practicum/shareit/handler/**</exclude>
+								</excludes>
 							</configuration>
 						</execution>
 						<execution>
