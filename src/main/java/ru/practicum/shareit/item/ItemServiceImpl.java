@@ -13,7 +13,6 @@ import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
@@ -46,20 +45,19 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + ownerId + " не найден!"));
-        Item item;
+        ItemRequest request;
 
         if (itemDto.getRequestId() != null) {
-            ItemRequest request = itemRequestRepository.findById(itemDto.getRequestId())
+            request = itemRequestRepository.findById(itemDto.getRequestId())
                     .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
-            item = itemRepository.save(toItem(itemDto, user, request));
         } else {
-            item = itemRepository.save(toItem(itemDto, user, null));
+            request = null;
         }
 
-        log.info("Добавлена новая вещь: {}", itemDto);
-
+        Item item = itemRepository.save(toItem(itemDto, user, request));
         List<Comment> comments = commentRepository.findByItemId(item.getId());
 
+        log.info("Добавлена новая вещь: {}", itemDto);
         return toItemDto(item, comments);
     }
 
@@ -180,15 +178,5 @@ public class ItemServiceImpl implements ItemService {
             throw new ValidationException("Отзывы могут оставлять только пользователи, которые брали вещь в аренду");
         }
         return toCommentDto(commentRepository.save(comment));
-    }
-
-    @Override
-    public List<ItemForItemRequestDto> getItemsByRequest(Long requestId) {
-        itemRequestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
-
-        return itemRepository.findByRequest_IdOrderById(requestId).stream()
-                .map(ItemMapper::toItemForItemRequestDto)
-                .collect(Collectors.toList());
     }
 }

@@ -6,7 +6,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -24,7 +26,7 @@ import static ru.practicum.shareit.request.ItemRequestMapper.toItemRequestDto;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository itemRequestRepository;
     private final UserRepository userRepository;
-    private final ItemService itemService;
+    private final ItemRepository itemRepository;
 
     @Transactional
     @Override
@@ -47,7 +49,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Получен список запросов пользователя с id: {}", requestorId);
 
         return itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(requestorId).stream()
-                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
+                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, getItemsByRequest(ItemRequestMapper.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -58,7 +60,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Получен список запросов других пользователей");
 
         return itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(userId, page)
-                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
+                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, getItemsByRequest(ItemRequestMapper.getId())))
                 .getContent();
     }
 
@@ -71,6 +73,15 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         log.info("Получен запрос с id: {}", requestId);
 
-        return toItemRequestDto(itemRequest, itemService.getItemsByRequest(requestId));
+        return toItemRequestDto(itemRequest, getItemsByRequest(requestId));
+    }
+
+    List<ItemForItemRequestDto> getItemsByRequest(Long requestId) {
+        itemRequestRepository.findById(requestId)
+                .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
+
+        return itemRepository.findByRequest_IdOrderById(requestId).stream()
+                .map(ItemMapper::toItemForItemRequestDto)
+                .collect(Collectors.toList());
     }
 }

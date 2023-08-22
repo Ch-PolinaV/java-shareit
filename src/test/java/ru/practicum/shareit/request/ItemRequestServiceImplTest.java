@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -31,23 +33,26 @@ class ItemRequestServiceImplTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    ItemService itemService;
+    ItemRepository itemRepository;
     @InjectMocks
     private ItemRequestServiceImpl itemRequestService;
     private final LocalDateTime created = LocalDateTime.now();
     private final User user = new User(1L, "Name", "test@test.ru");
     private final User secondUser = new User(2L, "Second", "test@email.ru");
     private final ItemRequest itemRequest = new ItemRequest(1L, "description", user, created);
-    private final ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest, null);
+    private final Item item = new Item(1L, "Item", "text", true, secondUser, itemRequest);
+    private final ItemForItemRequestDto itemForItemRequestDto = new ItemForItemRequestDto(1L, "Item", "text", itemRequest.getId(), true);
+    private final ItemRequestDto itemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest, List.of(itemForItemRequestDto));
+    private final ItemRequestDto newItemRequestDto = ItemRequestMapper.toItemRequestDto(itemRequest, null);
 
     @Test
     void shouldCreateItemRequest() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(itemRequestRepository.save(itemRequest)).thenReturn(itemRequest);
 
-        ItemRequestDto actualRequest = itemRequestService.create(itemRequestDto, user.getId(), created);
+        ItemRequestDto actualRequest = itemRequestService.create(newItemRequestDto, user.getId(), created);
 
-        assertEquals(itemRequestDto, actualRequest);
+        assertEquals(newItemRequestDto, actualRequest);
         verify(itemRequestRepository, times(1)).save(itemRequest);
     }
 
@@ -64,11 +69,12 @@ class ItemRequestServiceImplTest {
         requests.add(itemRequest);
 
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
         when(itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(user.getId())).thenReturn(requests);
-        when(itemService.getItemsByRequest(itemRequest.getId())).thenReturn(null);
+        when(itemRepository.findByRequest_IdOrderById(itemRequest.getId())).thenReturn(List.of(item));
 
         List<ItemRequestDto> requestDtos = requests.stream()
-                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
+                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemRequestService.getItemsByRequest(ItemRequestMapper.getId())))
                 .collect(Collectors.toList());
         List<ItemRequestDto> actualRequestsList = itemRequestService.getOwnItemRequests(user.getId());
 
@@ -83,22 +89,20 @@ class ItemRequestServiceImplTest {
         List<ItemRequest> requests = List.of(itemRequest);
         Page<ItemRequest> requestsPage = new PageImpl<>(requests, page, requests.size());
 
+        when(itemRequestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
+        when(itemRepository.findByRequest_IdOrderById(itemRequest.getId())).thenReturn(List.of(item));
         when(itemRequestRepository.findAllByRequestorIdNotOrderByCreatedDesc(secondUser.getId(), page)).thenReturn(requestsPage);
-        when(itemService.getItemsByRequest(itemRequest.getId())).thenReturn(null);
 
-        List<ItemRequestDto> requestDtos = requests.stream()
-                .map(ItemRequestMapper -> toItemRequestDto(ItemRequestMapper, itemService.getItemsByRequest(ItemRequestMapper.getId())))
-                .collect(Collectors.toList());
-        List<ItemRequestDto> actualRequestsList = itemRequestService.getAllItemRequests(secondUser.getId(),from, size);
+        List<ItemRequestDto> actualList = itemRequestService.getAllItemRequests(secondUser.getId(), 0, 10);
 
-        assertEquals(requestDtos, actualRequestsList);
+        assertEquals(List.of(itemRequestDto), actualList);
     }
 
     @Test
     void shouldReturnItemRequestById() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        itemRequestDto.setItems(new ArrayList<>());
         when(itemRequestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
+        when(itemRepository.findByRequest_IdOrderById(itemRequest.getId())).thenReturn(List.of(item));
 
         ItemRequestDto actualRequest = itemRequestService.getItemRequestById(user.getId(), itemRequest.getId());
 

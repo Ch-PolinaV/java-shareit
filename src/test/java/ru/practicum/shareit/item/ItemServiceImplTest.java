@@ -17,7 +17,6 @@ import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
@@ -206,18 +205,5 @@ class ItemServiceImplTest {
 
         ValidationException exception = assertThrows(ValidationException.class, () -> itemService.createComment(user.getId(), commentDto, item.getId()));
         assertEquals("Отзывы могут оставлять только пользователи, которые брали вещь в аренду", exception.getMessage());
-    }
-
-    @Test
-    void shouldReturnItemsByRequest() {
-        List<Item> items = List.of(item);
-        when(itemRequestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
-        when(itemRepository.findByRequest_IdOrderById(itemRequest.getId())).thenReturn(items);
-
-        ItemForItemRequestDto itemForItemRequestDto = ItemMapper.toItemForItemRequestDto(item);
-        List<ItemForItemRequestDto> actualItems = itemService.getItemsByRequest(itemRequest.getId());
-
-
-        assertEquals(List.of(itemForItemRequestDto), actualItems);
     }
 }
