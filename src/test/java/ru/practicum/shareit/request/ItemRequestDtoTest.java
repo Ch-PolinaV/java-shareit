@@ -54,8 +54,5 @@ class ItemRequestDtoTest {
         Set<ConstraintViolation<ItemRequestDto>> violations = validator.validate(itemRequestDto);
 
         assertFalse(violations.isEmpty());
-
-        String jsonString = json.write(itemRequestDto).getJson();
-        System.out.println(jsonString);
     }
 }

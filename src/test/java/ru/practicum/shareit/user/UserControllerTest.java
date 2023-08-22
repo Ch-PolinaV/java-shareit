@@ -8,6 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exeption.AlreadyExistsException;
+import ru.practicum.shareit.exeption.NotFoundException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -18,8 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserController.class)
 class UserControllerTest {
@@ -59,6 +60,17 @@ class UserControllerTest {
 
     @SneakyThrows
     @Test
+    void getUserByIdWithNotExistUser() {
+        when(userService.getUserById(any(Long.class))).thenThrow(NotFoundException.class);
+
+        mvc.perform(get("/users/2"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"error\":\"Значение не найдено\",\"description\":null}"));
+    }
+
+    @SneakyThrows
+    @Test
     void create() {
         when(userService.create(any())).thenReturn(userDto);
 
@@ -71,6 +83,19 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.name", is(userDto.getName())))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+    }
+
+    @SneakyThrows
+    @Test
+    void createUserWithNotUniqueValue() {
+        when(userService.create(any())).thenThrow(AlreadyExistsException.class);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\": 1,\"name\":\"Name\",\"email\":\"test@test.ru\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json("{\"error\":\"Значение уже используется\",\"description\":null}"));
     }
 
     @SneakyThrows

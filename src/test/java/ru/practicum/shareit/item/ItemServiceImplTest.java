@@ -63,7 +63,7 @@ class ItemServiceImplTest {
     private final List<Comment> comments = List.of(comment);
     private final List<CommentDto> commentDtoList = List.of(commentDto);
 
-    private ItemDto itemDto = ItemMapper.toItemDto(item, comments);
+    private final ItemDto itemDto = ItemMapper.toItemDto(item, comments);
 
     private final Booking booking = new Booking(1L, start, end, item, user, BookingStatus.WAITING);
     private final Booking bookingNext = new Booking(2L, start.plusHours(2), end.plusHours(2), item, user, BookingStatus.APPROVED);
@@ -86,15 +86,17 @@ class ItemServiceImplTest {
 
     @Test
     void shouldCreateItemWithoutItemRequest() {
-        item.setRequest(null);
-        itemDto = ItemMapper.toItemDto(item, comments);
-        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-        when(commentRepository.findByItemId(item.getId())).thenReturn(comments);
-        when(itemRepository.save(item)).thenReturn(item);
+        Item itemWithoutItemRequest = new Item(2L, "Item", "text", true, owner, null);
+        Comment comment1 = new Comment(2L, "text", itemWithoutItemRequest, user, created);
 
-        ItemDto actualItem = itemService.create(itemDto, owner.getId());
-        assertEquals(itemDto, actualItem);
-        verify(itemRepository, times(1)).save(item);
+        ItemDto newItemDto = ItemMapper.toItemDto(itemWithoutItemRequest, List.of(comment1));
+        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(commentRepository.findByItemId(itemWithoutItemRequest.getId())).thenReturn(List.of(comment1));
+        when(itemRepository.save(itemWithoutItemRequest)).thenReturn(itemWithoutItemRequest);
+
+        ItemDto actualItem = itemService.create(newItemDto, owner.getId());
+        assertEquals(newItemDto, actualItem);
+        verify(itemRepository, times(1)).save(itemWithoutItemRequest);
     }
 
     @Test

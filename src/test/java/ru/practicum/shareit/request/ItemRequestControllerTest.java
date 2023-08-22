@@ -8,12 +8,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.user.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -55,6 +57,29 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.description", is(itemRequestDto.getDescription())))
                 .andExpect(jsonPath("$.requestor", is(itemRequestDto.getRequestor()), Long.class))
                 .andExpect(jsonPath("$.created", is(itemRequestDto.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))));
+    }
+
+    @SneakyThrows
+    @Test
+    void createInvalidItemRequest() {
+        when(itemRequestService.create(any(), any(Long.class), any(LocalDateTime.class))).thenThrow(new ValidationException("Недопустимое значение"));
+
+        ItemRequestDto invalidItemRequestDto = new ItemRequestDto(
+                1L,
+                "",
+                1L,
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+
+        mvc.perform(post("/requests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(invalidItemRequestDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER, 1))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Недопустимое значение")));
     }
 
     @SneakyThrows
