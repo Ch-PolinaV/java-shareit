@@ -1,30 +1,31 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(Long userId, LocalDateTime start, LocalDateTime end);
+    Page<Booking> findByBookerIdAndStartIsBeforeAndEndIsAfter(Long userId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByBookerIdAndEndBefore(Long userId, LocalDateTime end);
+    Page<Booking> findByBookerIdAndEndBefore(Long userId, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStartAfter(Long userId, LocalDateTime start);
+    Page<Booking> findByBookerIdAndStartAfter(Long userId, LocalDateTime start, Pageable pageable);
 
-    List<Booking> findByBookerIdAndStatus(Long userId, BookingStatus status);
+    Page<Booking> findByBookerIdAndStatus(Long userId, BookingStatus status, Pageable pageable);
 
-    List<Booking> findByBookerId(Long userId);
+    Page<Booking> findByBookerId(Long userId, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStartIsBeforeAndEndAfter(Long ownerId, LocalDateTime start, LocalDateTime end);
+    Page<Booking> findByItemOwnerIdAndStartIsBeforeAndEndAfter(Long ownerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndEndBefore(Long ownerId, LocalDateTime end);
+    Page<Booking> findByItemOwnerIdAndEndBefore(Long ownerId, LocalDateTime end, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStartAfter(Long ownerId, LocalDateTime start);
+    Page<Booking> findByItemOwnerIdAndStartAfter(Long ownerId, LocalDateTime start, Pageable pageable);
 
-    List<Booking> findByItemOwnerIdAndStatus(Long ownerId, BookingStatus status);
+    Page<Booking> findByItemOwnerIdAndStatus(Long ownerId, BookingStatus status, Pageable pageable);
 
-    List<Booking> findByItemOwnerId(Long ownerId);
+    Page<Booking> findByItemOwnerId(Long ownerId, Pageable pageable);
 
     Booking findFirstByItem_IdAndStartBeforeOrderByEndDesc(Long itemId, LocalDateTime startTime);
 

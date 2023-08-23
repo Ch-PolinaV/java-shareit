@@ -23,4 +23,5 @@ public class ItemDto implements Serializable {
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
     private List<CommentDto> comments;
+    private Long requestId;
 }

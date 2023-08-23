@@ -2,6 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -13,6 +15,8 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -34,18 +38,26 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Transactional
     @Override
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + ownerId + " не найден!"));
+        ItemRequest request;
 
-        log.info("Добавлена новая вещь: {}", itemDto);
+        if (itemDto.getRequestId() != null) {
+            request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Запрос не найден!"));
+        } else {
+            request = null;
+        }
 
-        Item item = itemRepository.save(toItem(itemDto, user));
+        Item item = itemRepository.save(toItem(itemDto, user, request));
         List<Comment> comments = commentRepository.findByItemId(item.getId());
 
+        log.info("Добавлена новая вещь: {}", itemDto);
         return toItemDto(item, comments);
     }
 
@@ -72,7 +84,7 @@ public class ItemServiceImpl implements ItemService {
 
         List<Comment> comments = commentRepository.findByItemId(item.getId());
         ItemDto updateItemDto = toItemDto(item, comments);
-        itemRepository.save(toItem(updateItemDto, user));
+        itemRepository.save(toItem(updateItemDto, user, item.getRequest()));
 
         log.info("Вещь с id: {} обновлена", item.getId());
 
@@ -101,8 +113,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsByOwner(Long ownerId) {
-        List<Item> items = itemRepository.findByOwner_Id(ownerId).stream()
+    public List<ItemDto> getItemsByOwner(Long ownerId, Integer from, Integer size) {
+        PageRequest page = PageRequest.of(from > 0 ? from / size : from, size);
+
+        List<Item> items = itemRepository.findByOwner_Id(ownerId, page).stream()
                 .sorted(Comparator.comparing(Item::getId))
                 .collect(Collectors.toList());
         List<ItemDto> itemDtos = new ArrayList<>();
@@ -127,12 +141,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsBySearchQuery(String text) {
+    public List<ItemDto> getItemsBySearchQuery(String text, Integer from, Integer size) {
+        PageRequest page = PageRequest.of(from > 0 ? from / size : from, size);
+
         if (text.isBlank()) {
             return new ArrayList<>();
         }
 
-        List<Item> items = itemRepository.findBySearchQuery(text.toLowerCase());
+        Page<Item> items = itemRepository.findBySearchQuery(text.toLowerCase(), page);
         List<ItemDto> itemDtos = new ArrayList<>();
 
         for (Item item : items) {

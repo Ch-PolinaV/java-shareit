@@ -3,8 +3,10 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemForBookingDto;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -16,6 +18,13 @@ public class ItemMapper {
         List<CommentDto> commentDtos = comments.stream()
                 .map(ItemMapper::toCommentDto)
                 .collect(Collectors.toList());
+        Long requestId;
+
+        if (item.getRequest() != null) {
+            requestId = item.getRequest().getId();
+        } else {
+            requestId = null;
+        }
 
         return new ItemDto(
                 item.getId(),
@@ -24,7 +33,8 @@ public class ItemMapper {
                 item.getAvailable(),
                 null,
                 null,
-                commentDtos
+                commentDtos,
+                requestId
         );
     }
 
@@ -39,14 +49,32 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto, User user) {
+    public static ItemForItemRequestDto toItemForItemRequestDto(Item item) {
+        Long requestId;
+
+        if (item.getRequest() != null) {
+            requestId = item.getRequest().getId();
+        } else {
+            requestId = null;
+        }
+
+        return new ItemForItemRequestDto(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                requestId,
+                item.getAvailable()
+        );
+    }
+
+    public static Item toItem(ItemDto itemDto, User user, ItemRequest request) {
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 user,
-                null
+                request
         );
     }
 
