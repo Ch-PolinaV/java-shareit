@@ -35,7 +35,6 @@ public class ItemClient extends BaseClient {
         return patch("/" + itemId, userId, itemDto);
     }
 
-
     public ResponseEntity<Object> getItemById(long userId, Long itemId) {
         return get("/" + itemId, userId);
     }
@@ -49,7 +48,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getItemsBySearchQuery(String text, Integer from, Integer size) {
-        String path = "/search?text="+ text + "&from="+ from + "&size=" + size;
+        String path = "/search?text=" + text + "&from=" + from + "&size=" + size;
         return get(path);
     }
 
